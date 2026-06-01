@@ -1,4 +1,16 @@
-# JJ's Birthday Card
+> ### 🔱 About this fork
+> 
+> This is a fork of [JJ's Birthday Card](https://github.com/jansendejong/JJs-Birthday-Card).  
+> The only addition (made with help of Claude Opus 4.7) is a **"deceased"** checkbox per person.  
+> When enabled, the festive emoji is replaced by a memorial candle 🕯️ and the age display changes from *"(45 years)"* to *"(would have been 45 years)"* — a respectful way to remember loved ones on their birthday.
+> 
+> All credit for the original card goes to [JJ](https://github.com/jansendejong). 💛
+
+
+
+
+
+# JJ's Birthday Card // Waterpater Version
 
 A simple and user-friendly Lovelace card for Home Assistant that displays upcoming birthdays. The card is designed to give you a quick overview of who has a birthday soon. The visual editor makes it easy to customize the card to your liking.
 
