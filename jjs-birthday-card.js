@@ -1,5 +1,5 @@
 // jjs-birthday-card.js
-// v2.3.0 — Added "deceased" option per person (shows candle emoji + "would have been X years")
+// v2.3.1 — Added "deceased" option per person (shows candle emoji + "would have been X years")
 
 // ------------- IMPORTS -------------
 import { LitElement, html, css } 
