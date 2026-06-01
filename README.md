@@ -57,12 +57,20 @@ www/jjs-birthday-card/
 
 4. Reload the browser or press **CTRL+F5**
 
-## 🚀 Installation via HACS
+## 🚀 Installation via HACS (Custom Repository)
 
-1. Open HACS
-2. Search for 'JJ's Birthday Card'
-3. Install
-4. Reload the frontend
+Since this is a forked version, it's not available in the default HACS store. You'll need to add it as a custom repository:
+
+1. Open **HACS** in Home Assistant
+2. Click the **three dots** menu (top right) → **Custom repositories**
+3. Fill in:
+   - **Repository:** `https://github.com/waterpater/Birthday-Card`
+   - **Type:** `Dashboard`
+4. Click **Add**
+5. Close the dialog and search for **"Birthday Card"** in HACS
+6. Click **Download**
+7. Reload the frontend (CTRL + F5)
+8. Add the card to your dashboard via **Edit Dashboard → Add Card → Custom: JJ's Birthday Card**
 
 ## 💻 Usage in Lovelace
 
