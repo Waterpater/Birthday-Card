@@ -1,8 +1,7 @@
 {
-  "name": "JJ's Birthday Card",
+  "name": "JJ's Birthday Card (Deceased Fork)",
   "render_readme": true,
   "filename": "jjs-birthday-card.js",
-  "zip_release": false,
   "homeassistant": "2023.0.0",
   "hide_default_branch": true
 }
