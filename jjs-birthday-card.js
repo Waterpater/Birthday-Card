@@ -1,5 +1,5 @@
 // jjs-birthday-card.js
-// v2.2.1 — Background and text color adjustable incl. transparent background
+// v2.3.0 — Added "deceased" option per person (shows candle emoji + "would have been X years")
 
 // ------------- IMPORTS -------------
 import { LitElement, html, css } 
@@ -21,7 +21,6 @@ class JJsBirthdayCard extends LitElement {
       .card {
         padding: 16px;
         border-radius: 12px;
-        /* Defaults; worden door inline style overschreven als je iets instelt in de editor */
         background: var(--ha-card-background, #fff);
         color: var(--primary-text-color, #000);
         box-shadow: var(--ha-card-box-shadow, 0 2px 4px rgba(0,0,0,0.1));
@@ -44,7 +43,6 @@ class JJsBirthdayCard extends LitElement {
         font-weight: bold;
         margin-bottom: 8px;
       }
-      /* Leeftijd erft de actuele tekstkleur (dus kleurt mee) */
       .age {
         color: inherit;
         opacity: 0.75;
@@ -62,7 +60,6 @@ class JJsBirthdayCard extends LitElement {
       throw new Error('You need to define birthdays');
     }
 
-    // eerst spreaden (zodat onze defaults erna leidend kunnen zijn)
     const base = { ...config };
 
     const transparent = base.transparent_background === true;
@@ -74,12 +71,10 @@ class JJsBirthdayCard extends LitElement {
       hide_if_empty: base.hide_if_empty === true,
       today_color: base.today_color || "#ffe082",
 
-      // Kleuren (zonder defaults forceren; undefined = thema)
       transparent_background: transparent,
-      card_background: bg,            // bv. "#ffffff" of "transparent" of undefined
-      card_text_color: fg,            // bv. "#000000" of undefined
+      card_background: bg,
+      card_text_color: fg,
 
-      // rest
       ...base,
     };
   }
@@ -88,11 +83,11 @@ class JJsBirthdayCard extends LitElement {
     const lang = this.hass?.language || 'en';
 
     const translations = {
-      en: { header: (d)=>`Birthdays in the next ${d} days`, noBirthdays:"No birthdays added", noneUpcoming:"No upcoming birthdays", today:"today", tomorrow:"tomorrow", year:"years" },
-      nl: { header: (d)=>`Verjaardagen komende ${d} dagen`, noBirthdays:"Geen verjaardagen toegevoegd", noneUpcoming:"Geen verjaardagen", today:"vandaag", tomorrow:"morgen", year:"jaar" },
-      de: { header: (d)=>`Geburtstage in den nächsten ${d} Tagen`, noBirthdays:"Keine Geburtstage hinzugefügt", noneUpcoming:"Keine bevorstehenden Geburtstage", today:"heute", tomorrow:"morgen", year:"Jahre" },
-      fr: { header: (d)=>`Anniversaires dans les ${d} prochains jours`, noBirthdays:"Aucun anniversaire ajouté", noneUpcoming:"Aucun anniversaire à venir", today:"aujourd'hui", tomorrow:"demain", year:"ans" },
-      es: { header: (d)=>`Cumpleaños en los próximos ${d} días`, noBirthdays:"No se han añadido cumpleaños", noneUpcoming:"No hay cumpleaños próximos", today:"hoy", tomorrow:"mañana", year:"años" }
+      en: { header: (d)=>`Birthdays in the next ${d} days`, noBirthdays:"No birthdays added", noneUpcoming:"No upcoming birthdays", today:"today", tomorrow:"tomorrow", year:"years", wouldHaveBeen: (a)=>`would have been ${a} years` },
+      nl: { header: (d)=>`Verjaardagen komende ${d} dagen`, noBirthdays:"Geen verjaardagen toegevoegd", noneUpcoming:"Geen verjaardagen", today:"vandaag", tomorrow:"morgen", year:"jaar", wouldHaveBeen: (a)=>`zou ${a} jaar zijn geworden` },
+      de: { header: (d)=>`Geburtstage in den nächsten ${d} Tagen`, noBirthdays:"Keine Geburtstage hinzugefügt", noneUpcoming:"Keine bevorstehenden Geburtstage", today:"heute", tomorrow:"morgen", year:"Jahre", wouldHaveBeen: (a)=>`wäre ${a} Jahre alt geworden` },
+      fr: { header: (d)=>`Anniversaires dans les ${d} prochains jours`, noBirthdays:"Aucun anniversaire ajouté", noneUpcoming:"Aucun anniversaire à venir", today:"aujourd'hui", tomorrow:"demain", year:"ans", wouldHaveBeen: (a)=>`aurait eu ${a} ans` },
+      es: { header: (d)=>`Cumpleaños en los próximos ${d} días`, noBirthdays:"No se han añadido cumpleaños", noneUpcoming:"No hay cumpleaños próximos", today:"hoy", tomorrow:"mañana", year:"años", wouldHaveBeen: (a)=>`habría cumplido ${a} años` }
     };
     const t = translations[lang] || translations["en"];
 
@@ -156,7 +151,7 @@ class JJsBirthdayCard extends LitElement {
           const age = b.date.getFullYear() - birthDate.getFullYear();
 
           const icons = ["🎉", "🎂", "🎁", "🎈", "✨", "🥳", "🍰"];
-          const icon = icons[index % icons.length];
+          const icon = b.deceased ? "🕯️" : icons[index % icons.length];
 
           const dateText = isToday
             ? t.today
@@ -177,15 +172,19 @@ class JJsBirthdayCard extends LitElement {
           };
           const textColor = getTextColor(bgColor);
 
+          // Tekst voor leeftijd: overleden krijgt "zou X jaar zijn geworden"
+          const ageText = b.deceased
+            ? t.wouldHaveBeen(age)
+            : `${age} ${lang === 'nl' ? 'jaar' : t.year}`;
+
           return html`
             <div class="birthday"
               style="display:flex;justify-content:space-between;align-items:center;
-              ${isToday ? `background-color:${bgColor}; color:${textColor};` : ''}">
+              ${isToday && !b.deceased ? `background-color:${bgColor}; color:${textColor};` : ''}">
               <span>
                 ${b.name}&nbsp;${icon}
-                <!-- leeftijd erft mee; bij vandaag forceren we contrastkleur -->
-                <span class="age" style="color:${isToday ? textColor : 'inherit'}">
-                  (${age} ${lang === 'nl' ? 'jaar' : t.year})
+                <span class="age" style="color:${isToday && !b.deceased ? textColor : 'inherit'}">
+                  (${ageText})
                 </span>
               </span>
               <span>${dateText}</span>
@@ -196,7 +195,6 @@ class JJsBirthdayCard extends LitElement {
     `;
   }
 
-  // Bouw de inline style voor ha-card op basis van config
   _cardStyle() {
     const bg = (this.config.transparent_background === true)
       ? 'transparent'
@@ -218,7 +216,7 @@ class JJsBirthdayCard extends LitElement {
       days_ahead: 7,
       sort_by: 'date',
       birthdays: [
-        { name: "Voorbeeld", date: new Date().toISOString().split('T')[0] },
+        { name: "Voorbeeld", date: new Date().toISOString().split('T')[0], deceased: false },
       ],
     };
   }
@@ -229,7 +227,7 @@ customElements.define("jjs-birthday-card", JJsBirthdayCard);
 // ===================================
 //   EDITOR COMPONENT
 // ===================================
-const makeEmptyBirthday = () => ({ name: "", date: "" });
+const makeEmptyBirthday = () => ({ name: "", date: "", deceased: false });
 
 class JJsBirthdayCardEditor extends LitElement {
   static get properties() {
@@ -260,10 +258,19 @@ class JJsBirthdayCardEditor extends LitElement {
       }
       .item {
         display: grid;
-        grid-template-columns: 1fr 140px 32px;
+        grid-template-columns: 1fr 140px auto 32px;
         gap: 8px;
         align-items: center;
         padding: 6px;
+      }
+      .item .deceased-toggle {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 0.85rem;
+        color: var(--secondary-text-color, #666);
+        white-space: nowrap;
+        cursor: pointer;
       }
       label {
         font-size: 0.9rem;
@@ -362,7 +369,11 @@ class JJsBirthdayCardEditor extends LitElement {
   setConfig(config) {
     const cfg = Object.assign({}, config || {});
     if (!Array.isArray(cfg.birthdays)) cfg.birthdays = [];
-    cfg.birthdays = cfg.birthdays.map(b => ({ name: b.name || "", date: b.date || "" }));
+    cfg.birthdays = cfg.birthdays.map(b => ({ 
+      name: b.name || "", 
+      date: b.date || "", 
+      deceased: b.deceased === true 
+    }));
     cfg.days_ahead = Number(cfg.days_ahead || 7);
     if (cfg.days_ahead < 1) cfg.days_ahead = 1;
     if (cfg.days_ahead > 365) cfg.days_ahead = 365;
@@ -372,7 +383,6 @@ class JJsBirthdayCardEditor extends LitElement {
     cfg.custom_header = cfg.custom_header || "";
     cfg.hide_if_empty = config.hide_if_empty === true;
 
-    // Kleuren (zonder defaults te forceren; undefined = thema)
     cfg.today_color = cfg.today_color || "#ffe082";
     cfg.transparent_background = config.transparent_background === true;
     cfg.card_background = cfg.transparent_background
@@ -410,6 +420,13 @@ class JJsBirthdayCardEditor extends LitElement {
     const val = ev.target.value;
     const newList = this._config.birthdays.slice();
     newList[idx] = { ...newList[idx], [field]: val };
+    this._config = { ...this._config, birthdays: newList };
+    this._fireConfigChanged();
+  }
+
+  _toggleDeceased(idx, ev) {
+    const newList = this._config.birthdays.slice();
+    newList[idx] = { ...newList[idx], deceased: ev.target.checked };
     this._config = { ...this._config, birthdays: newList };
     this._fireConfigChanged();
   }
@@ -459,6 +476,7 @@ class JJsBirthdayCardEditor extends LitElement {
         transparentBg: "Transparent background",
         cardTextColor: "Text color",
         resetTheme: "Theme colors",
+        deceased: "Deceased",
       },
       nl: {
         sortBy: "Sorteren op",
@@ -480,6 +498,7 @@ class JJsBirthdayCardEditor extends LitElement {
         transparentBg: "Transparant",
         cardTextColor: "Tekstkleur",
         resetTheme: "Thema kleuren",
+        deceased: "Overleden",
       },
       de: {
         sortBy: "Sortieren nach",
@@ -501,6 +520,7 @@ class JJsBirthdayCardEditor extends LitElement {
         transparentBg: "Transparent",
         cardTextColor: "Textfarbe",
         resetTheme: "Themafarbe",
+        deceased: "Verstorben",
       },
       fr: {
         sortBy: "Trier par",
@@ -522,6 +542,7 @@ class JJsBirthdayCardEditor extends LitElement {
         transparentBg: "Transparent",
         cardTextColor: "Couleur du texte",
         resetTheme: "Thème couleur",
+        deceased: "Décédé",
       },
       es: {
         sortBy: "Ordenar por",
@@ -543,6 +564,7 @@ class JJsBirthdayCardEditor extends LitElement {
         transparentBg: "Transparente",
         cardTextColor: "Color del texto",
         resetTheme: "Tema color",
+        deceased: "Fallecido",
       }
     };
     const t_editor = translationsEditor[lang] || translationsEditor['en'];
@@ -697,6 +719,14 @@ class JJsBirthdayCardEditor extends LitElement {
                 @change=${e => this._updateBirthday(idx, 'date', e)} 
                 aria-label=${t_editor.date}
               />
+              <label class="deceased-toggle" title=${t_editor.deceased}>
+                <input
+                  type="checkbox"
+                  .checked=${b.deceased === true}
+                  @change=${e => this._toggleDeceased(idx, e)}
+                />
+                ${t_editor.deceased}
+              </label>
               <button 
                 class="icon delete" 
                 title=${t_editor.delete} 
