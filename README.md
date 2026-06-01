@@ -123,11 +123,7 @@ When you mark a person as deceased:
 
 This makes the card a nice way to remember loved ones on the day they would have celebrated their birthday.
 
-## 🖼️ Screenshots
 
-*jjs-birthday-card multilanguage*
-
-*jjs-birthday-card-editor multilanguage*
 
 ## 📄 License
 
@@ -135,9 +131,8 @@ This project is licensed under the MIT License. You are free to use, modify, and
 
 ## ❤️ Credits & Contact
 
-Created by: **J. de Jong (J.J.)**  
+Created by: **J. de Jong (J.J.)** // Added deceased option by **Waterpater** 
 Feedback or ideas? Feel free to open an issue or pull request on GitHub.
 
 Enjoy the card! 🎂
 
-[Buy Me A Coffee]
